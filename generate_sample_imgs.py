@@ -99,12 +99,12 @@ def generate_imgs_for_dir(path_dir):
         guidance_scales = [0]
 
     for guidance_scale in guidance_scales:
-        print(f"Guidance scale: {guidance_scale}")
+        print(f"Guidance scale: {guidance_scale:<100}")
         generate_imgs_with_model(path_dir, model, sample_dataloader, mask_text_dataset, diffusion, args, guidance_scale=guidance_scale)
 
 if __name__ == "__main__":
     paths = [
-        pathlib.Path("test/inpainting/")
+        pathlib.Path("results/inpainting/")
     ]
     for path_dir in paths:
         print(f"Dir: {path_dir}")
