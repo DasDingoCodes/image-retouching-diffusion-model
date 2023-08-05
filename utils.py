@@ -371,7 +371,11 @@ def sample_text_mask_dataset(dataloader, num_sample_imgs):
     sample_imgs_from_dataset, sample_masks_from_dataset, sample_embeddings_from_dataset, img_names = next(iterator)
     img_names = list(img_names)
     while sample_imgs_from_dataset.shape[0] < num_sample_imgs:
-        imgs_next_batch, masks_next_batch, embeddings_next_batch, img_names_next_batch = next(iterator)
+        try:
+            imgs_next_batch, masks_next_batch, embeddings_next_batch, img_names_next_batch = next(iterator)
+        except StopIteration:
+            iterator = iter(dataloader)
+            imgs_next_batch, masks_next_batch, embeddings_next_batch, img_names_next_batch = next(iterator)
         sample_imgs_from_dataset = torch.concat((sample_imgs_from_dataset, imgs_next_batch))
         sample_masks_from_dataset = torch.concat((sample_masks_from_dataset, masks_next_batch))
         sample_embeddings_from_dataset = torch.concat((sample_embeddings_from_dataset, embeddings_next_batch))
