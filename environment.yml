@@ -1,0 +1,21 @@
+name: my_pytorch
+channels:
+  - pytorch
+  - nvidia
+  - defaults
+  - conda-forge
+dependencies:
+  - python==3.8
+  - pytorch-cuda=11.7
+  - pytorch
+  - torchvision
+  - torchaudio
+  - jupyter
+  - matplotlib
+  - tqdm
+  - torchmetrics
+  - scikit-image
+  - transformers
+  - sentence-transformers
+  - pandas
+prefix: C:\Users\david\miniconda3\envs\my_pytorch
