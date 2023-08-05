@@ -1,7 +1,7 @@
 import torch
 import torchvision.transforms as T
 
-from ddpm_utils import *
+from utils import *
 
 
 class Diffusion:
