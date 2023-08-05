@@ -348,13 +348,7 @@ if __name__ == '__main__':
     args.dataset_mask_dir = Path("data/CelebAMask-HQ/hair_masks")
 
     # dataset_path_embeddings can either be path to .pt file, .csv file or path to directory that contains .pt files
-    # examples:
-    #   directory: Path("data/CelebAMask-HQ/descriptions_embedded")
-    #   pt file: Path("data/celeba_attr/celeba_attr.pt")
-    #   csv file: Path("data/celeba_attr/black_blond.csv")
-    #   csv file: Path("data/CelebAMask-HQ/black_blond.csv")
-    #   
-    args.dataset_path_embeddings = Path("data/CelebAMask-HQ/black_blond.csv")
+    args.dataset_path_embeddings = Path("data/CelebAMask-HQ/attr_hair_revised_first10.csv")
 
     ###############################
     # Super Resolution Parameters #
