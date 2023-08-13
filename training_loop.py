@@ -291,7 +291,7 @@ if __name__ == '__main__':
     args.noise_steps = 10
     args.batch_size = 2
     args.dataloader_num_workers = 0
-    args.run_name = f"{time_str}_{args.image_retouching_type}"
+    args.run_name = f"{args.image_retouching_type}"
     args.normalise = False
     args.save_plots = True # loss and FID plots
     args.epochs_per_samples = 5 # how many epochs until intermediate sample gets calulated?
