@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from torchmetrics import StructuralSimilarityIndexMeasure
+from torchmetrics.image import StructuralSimilarityIndexMeasure
 import numpy as np
 import torchvision
 from PIL import Image
