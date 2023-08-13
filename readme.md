@@ -18,6 +18,29 @@ Install rest of requirements with pip:
 
     pip install -r requirements.txt
 
+## Usage
+
+In the following steps we will train a diffusion model on inpainting masked images, i.e. some pixels will be blackened and the model tries to recreate them. This is only supposed to be a quick demonstration and will not produce good results.
+
+Activate the Conda environment you created above:
+
+    conda activate YOUR_ENV
+
+Train a model for 12 epochs on the tiny dataset (first ten images of [CelebAMask-HQ](https://github.com/switchablenorms/CelebAMask-HQ)):
+
+    python training_loop.py
+
+This creates the `results/inpainting` directory with a model checkpoint and sample images at some epochs. Next we will create the original images of the test data, i.e. the images we want to reconstruct, and afterwards the reconstructions of these test images:
+
+    python generate_original_test_imgs.py
+    python generate_sample_imgs.py
+
+Now we can compare the original images and the reconstructions. The following commands will print out the FID and SSIM scores of the test images:
+
+    python calculate_fid.py
+    python calculate_ssim.py
+
+
 
 ## Files
 
