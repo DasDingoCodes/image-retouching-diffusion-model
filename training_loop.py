@@ -63,16 +63,16 @@ def train(args):
     num_sample_imgs = 8*8
     noise_sample = torch.randn((num_sample_imgs, 3, args.image_size, args.image_size)).to(device)
     sample_percentage=0.1
-    train_dataloader, sample_dataloader, mask_text_dataset = get_data_img_mask_text(args, sample_percentage=sample_percentage)
-    text_embedding_dim = mask_text_dataset.get_embedding_dim()
+    train_dataloader, sample_dataloader, img_mask_embedding_dataset = get_data_img_mask_embeddings(args, sample_percentage=sample_percentage)
+    embedding_dim = img_mask_embedding_dataset.get_embedding_dim()
 
     # turn off data augmentation for the sample images
-    mask_text_dataset.apply_transforms = False
-    sample_imgs_from_dataset, sample_masks_from_dataset, sample_embeddings_from_dataset, _ = sample_text_mask_dataset(sample_dataloader, num_sample_imgs)
+    img_mask_embedding_dataset.apply_transforms = False
+    sample_imgs_from_dataset, sample_masks_from_dataset, sample_embeddings_from_dataset, _ = sample_img_mask_embeddings_dataset(sample_dataloader, num_sample_imgs)
     sample_imgs_from_dataset = sample_imgs_from_dataset.to(device)
     sample_masks_from_dataset = sample_masks_from_dataset.to(device)
     sample_embeddings_from_dataset = sample_embeddings_from_dataset.to(device)
-    mask_text_dataset.apply_transforms = True
+    img_mask_embedding_dataset.apply_transforms = True
     # turn on data augmentation for the training loop
 
     if not args.use_conditional_embeddings or args.dataset_path_embeddings == None:
@@ -95,8 +95,8 @@ def train(args):
         use_self_attention=args.use_self_attention,
         use_conditional_image=use_conditional_image,
         dropout=args.dropout,
-        use_conditional_text=use_conditional_embeddings,
-        text_embedding_dim=text_embedding_dim,
+        use_conditional_embedding=use_conditional_embeddings,
+        embedding_dim=embedding_dim,
         device=device,
         output_activation_func=args.model_output_activation_func,
         conditional_img_channels=conditional_img_channels,
@@ -170,19 +170,19 @@ def train(args):
         pbar = tqdm(range(args.steps_per_epoch))
         for i in pbar:
             try:
-                images, masks, conditional_text_embedding, idx = next(train_iterator)
+                images, masks, conditional_vector_embedding, idx = next(train_iterator)
             except StopIteration:
                 train_iterator = iter(train_dataloader)
-                images, masks, conditional_text_embedding, idx = next(train_iterator)
+                images, masks, conditional_vector_embedding, idx = next(train_iterator)
 
             train_data_ids.extend(idx)
 
             images = images.to(device)
             masks = masks.to(device)
-            conditional_text_embedding = conditional_text_embedding.to(device)
+            conditional_vector_embedding = conditional_vector_embedding.to(device)
 
             if not use_conditional_embeddings:
-                conditional_text_embedding = None
+                conditional_vector_embedding = None
 
             t = diffusion.sample_timesteps(images.shape[0]).to(device)
 
@@ -200,14 +200,14 @@ def train(args):
                 d_t, noise = diffusion.noise_images(images, t)
                 conditional_image = None
 
-            if classifier_free_guidance and conditional_text_embedding is not None:
+            if classifier_free_guidance and conditional_vector_embedding is not None:
                 # randomly set embeddings to empty tensors
                 is_class_cond = torch.rand(size=(images.shape[0], 1), device=device) >= args.classifier_free_guidance_prob
                 is_class_cond = is_class_cond.float()
-                embedding_mask = expand_like(is_class_cond, conditional_text_embedding)
-                conditional_text_embedding = conditional_text_embedding * embedding_mask
+                embedding_mask = expand_like(is_class_cond, conditional_vector_embedding)
+                conditional_vector_embedding = conditional_vector_embedding * embedding_mask
 
-            prediction = model(d_t, t, conditional_image=conditional_image, conditional_text_embedding=conditional_text_embedding)
+            prediction = model(d_t, t, conditional_image=conditional_image, conditional_vector_embedding=conditional_vector_embedding)
             loss = mse(noise, prediction)
 
             optimizer.zero_grad()
@@ -230,9 +230,9 @@ def train(args):
                 sampled_images = diffusion.sample(
                     model, 
                     n=num_sample_imgs,
-                    x=noise_sample,
+                    d_initial=noise_sample,
                     conditional_images=sample_input_imgs,
-                    conditional_text_embedding=sample_embeddings_from_dataset,
+                    conditional_vector_embedding=sample_embeddings_from_dataset,
                     batch_size=args.batch_size,
                     classifier_free_guidance_scale=guidance_scale
                 )
@@ -360,6 +360,6 @@ if __name__ == '__main__':
     #########################
     args.conditional_img_add_mask = True # whether to append mask to input image
     args.mask_value = 0.0
-    args.inpainting_texts_per_img = None # 10 for CelebAMask-HQ/descriptions_embedded
+    args.inpainting_embeddings_per_img = None
     train(args)
 

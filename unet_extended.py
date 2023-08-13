@@ -171,8 +171,8 @@ class UNetExtended(nn.Module):
         use_self_attention=True,
         use_conditional_image=False,
         conditional_img_channels=3,
-        use_conditional_text=False,
-        text_embedding_dim=384,
+        use_conditional_embedding=False,
+        embedding_dim=384,
         device="cuda",
         dropout=0.0,
         output_activation_func="tanh",
@@ -186,8 +186,8 @@ class UNetExtended(nn.Module):
         self.use_self_attention = use_self_attention
         self.use_conditional_image = use_conditional_image
         self.conditional_img_channels = conditional_img_channels * num_patches * num_patches # conditional image gets divided into patches
-        self.use_conditional_text = use_conditional_text
-        self.text_embedding_dim=text_embedding_dim
+        self.use_conditional_embedding = use_conditional_embedding
+        self.embedding_dim=embedding_dim
         self.dropout = dropout
 
         self.num_levels = len(self.level_mult) - 1
@@ -220,15 +220,15 @@ class UNetExtended(nn.Module):
                 dropout=dropout
             )
         
-        if self.use_conditional_text:
+        if self.use_conditional_embedding:
             self.embedding_reshaping = VectorToSquareMatrix(
-                self.text_embedding_dim,
-                self.img_size, # make text embedding matrix as big as input/output image
+                self.embedding_dim,
+                self.img_size, # make vector embedding matrix as big as input/output image
                 hidden=hidden
             )
-            self.in_layer_conditional_text = ConditionalInjection(
+            self.in_layer_conditional_vector = ConditionalInjection(
                 hidden * level_mult[0],
-                hidden, # the text embeddings get reshaped to a matrix with channel size of hidden
+                hidden, # the vector embeddings get reshaped to a matrix with channel size of hidden
                 hidden * level_mult[0],
                 self.num_patches, 
                 dropout=dropout
@@ -263,7 +263,7 @@ class UNetExtended(nn.Module):
                         dropout=dropout
                     )
                 )
-            if self.use_conditional_text:
+            if self.use_conditional_embedding:
                 self.down_conditional_txt_layers.append(
                     ConditionalInjection(
                         hidden_out,
@@ -325,7 +325,7 @@ class UNetExtended(nn.Module):
                         dropout=dropout
                     )
                 )
-            if self.use_conditional_text:
+            if self.use_conditional_embedding:
                 self.up_conditional_txt_layers.append(
                     ConditionalInjection(
                         hidden_out,
@@ -352,8 +352,8 @@ class UNetExtended(nn.Module):
                 1, # don't need to scale down conditional image
                 dropout=dropout
             )
-        if self.use_conditional_text:
-            self.out_layer_conditional_text = ConditionalInjection(
+        if self.use_conditional_embedding:
+            self.out_layer_conditional_vector = ConditionalInjection(
                 hidden * level_mult[0],
                 hidden,
                 hidden * level_mult[0],
@@ -401,7 +401,7 @@ class UNetExtended(nn.Module):
         x = x.permute(0,2,1,3).reshape(B, H*p, W*p, C//(p*p))
         return x.permute(0, 3, 1, 2)
 
-    def forward(self, x, t, conditional_image=None, conditional_text_embedding=None):
+    def forward(self, x, t, conditional_image=None, conditional_vector_embedding=None):
         t = t.unsqueeze(-1).type(torch.float)
         t = self.pos_encoding(t, self.time_dim)
 
@@ -411,9 +411,9 @@ class UNetExtended(nn.Module):
         if self.use_conditional_image and conditional_image != None:
             conditional_image = self.to_patches(conditional_image, patch_size=self.num_patches)
             x = self.in_layer_conditional_img(x, conditional_image)
-        if self.use_conditional_text and conditional_text_embedding != None:
-            conditional_text_embedding = self.embedding_reshaping(conditional_text_embedding)
-            x = self.in_layer_conditional_text(x, conditional_text_embedding)
+        if self.use_conditional_embedding and conditional_vector_embedding != None:
+            conditional_vector_embedding = self.embedding_reshaping(conditional_vector_embedding)
+            x = self.in_layer_conditional_vector(x, conditional_vector_embedding)
 
         # Down
         x_down_list = []
@@ -426,9 +426,9 @@ class UNetExtended(nn.Module):
                 conditional = self.down_conditional_img_layers[i]
                 x = conditional(x, conditional_image)
                 x = self.activation_func(x)
-            if  self.use_conditional_text and conditional_text_embedding != None:
+            if  self.use_conditional_embedding and conditional_vector_embedding != None:
                 conditional = self.down_conditional_txt_layers[i]
-                x = conditional(x, conditional_text_embedding)
+                x = conditional(x, conditional_vector_embedding)
                 x = self.activation_func(x)
             if self.use_self_attention:
                 att = self.down_att_layers[i]
@@ -448,9 +448,9 @@ class UNetExtended(nn.Module):
                 conditional = self.up_conditional_img_layers[i]
                 x = conditional(x, conditional_image)
                 x = self.activation_func(x)
-            if  self.use_conditional_text and conditional_text_embedding != None:
+            if  self.use_conditional_embedding and conditional_vector_embedding != None:
                 conditional = self.up_conditional_txt_layers[i]
-                x = conditional(x, conditional_text_embedding)
+                x = conditional(x, conditional_vector_embedding)
                 x = self.activation_func(x)
             if self.use_self_attention:
                 att = self.up_att_layers[i]
@@ -459,8 +459,8 @@ class UNetExtended(nn.Module):
 
         if  self.use_conditional_image and conditional_image != None:
             x = self.out_layer_conditional_img(x, conditional_image)
-        if  self.use_conditional_text and conditional_text_embedding != None:
-            x = self.out_layer_conditional_text(x, conditional_text_embedding)
+        if  self.use_conditional_embedding and conditional_vector_embedding != None:
+            x = self.out_layer_conditional_vector(x, conditional_vector_embedding)
         output = self.out_layer(x)
         if self.num_patches > 1:
             output = self.from_patches(output, patch_size=self.num_patches)

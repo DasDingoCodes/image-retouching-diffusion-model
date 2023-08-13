@@ -12,18 +12,18 @@ if sys.platform == "win32":
     temp = pathlib.PosixPath
     pathlib.PosixPath = pathlib.WindowsPath
 
-def generate_imgs_with_model(path_dir, sample_dataloader, mask_text_dataset, batch_size):
+def generate_imgs_with_model(path_dir, sample_dataloader, img_mask_embedding_dataset, batch_size):
     path_dir.mkdir(parents=True, exist_ok=True)
 
-    mask_text_dataset.apply_transforms = False
+    img_mask_embedding_dataset.apply_transforms = False
     sample_iterator = iter(sample_dataloader)
-    num_total_batches = math.ceil(mask_text_dataset.__len__()*0.1/batch_size)
+    num_total_batches = math.ceil(img_mask_embedding_dataset.__len__()*0.1/batch_size)
     i = 0
     while True:
         time_str = datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
         print(f"{time_str} Batch {i:>6}/{num_total_batches}", end="\r")
         try:
-            images, masks, conditional_text_embedding, idx = next(sample_iterator)
+            images, _, _, idx = next(sample_iterator)
         except StopIteration:
             break
         save_imgs_from_batch(images, idx, path_dir)
@@ -47,8 +47,8 @@ def generate_imgs_for_dir(path_model_dir, path_output_dir):
         print(f"Error: Path {path_chkpt} does not exist!")
         return
 
-    _, _, sample_dataloader, mask_text_dataset, _, args, _ = load_checkpoint(path_chkpt=path_chkpt)
-    generate_imgs_with_model(path_output_dir, sample_dataloader, mask_text_dataset, args.batch_size)
+    _, _, sample_dataloader, img_mask_embedding_dataset, _, args, _ = load_checkpoint(path_chkpt=path_chkpt)
+    generate_imgs_with_model(path_output_dir, sample_dataloader, img_mask_embedding_dataset, args.batch_size)
 
 
 if __name__ == "__main__":

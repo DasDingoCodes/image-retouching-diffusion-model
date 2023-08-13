@@ -90,16 +90,16 @@ def setup_logging(run_name):
     os.makedirs("results", exist_ok=True)
     os.makedirs(os.path.join("results", run_name), exist_ok=True)
 
-def get_data_img_mask_text(args, sample_percentage):
+def get_data_img_mask_embeddings(args, sample_percentage):
     # ensure that always the same split for the data is being used
     torch.manual_seed(0)
     path_mask_dir = args.dataset_mask_dir if args.image_retouching_type == "inpainting" else None
     path_embeddings = args.dataset_path_embeddings if args.use_conditional_embeddings else None
-    dataset = TextMaskDataset(
+    dataset = ImgMaskEmbeddingsDataset(
         path_image_dir=args.dataset_image_dir,
         path_mask_dir=path_mask_dir,
         path_embeddings=path_embeddings,
-        texts_per_img=args.inpainting_texts_per_img,
+        embeddings_per_img=args.inpainting_embeddings_per_img,
         img_size=args.image_size,
         normalise=args.normalise
     )
@@ -108,7 +108,7 @@ def get_data_img_mask_text(args, sample_percentage):
     sample_dataloader = DataLoader(sample_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.dataloader_num_workers)
     return train_dataloader, sample_dataloader, dataset
 
-class TextMaskDataset(Dataset):
+class ImgMaskEmbeddingsDataset(Dataset):
     """Images with masks and descriptions"""
 
     def __init__(
@@ -116,7 +116,7 @@ class TextMaskDataset(Dataset):
         path_image_dir, 
         path_mask_dir=None, 
         path_embeddings=None, 
-        texts_per_img=None, 
+        embeddings_per_img=None, 
         img_size=128, 
         normalise=True,
         apply_transforms=True
@@ -126,10 +126,10 @@ class TextMaskDataset(Dataset):
             path_image_dir: Path of directory containing image files. All images are .jpg files and are named only with an index
             path_mask_dir: Path of directory containing mask files. All masks are .png files and are named only with an index
             path_embeddings: Can be path to a pt file, a csv file, or a path to a directory with the embeddings for the images. Defaults to None.
-                pt file: Pytorch tensor should have shape (num_images, texts_per_img, embedding_dimensions).
+                pt file: Pytorch tensor should have shape (num_images, embeddings_per_img, embedding_dimensions).
                 csv file: for each image there is a row with comma separated values, the first of which being the name of the image file
-                directory: For each image there is either a pt file with the embeddings or a directory with texts_per_img pt embedding files for that image
-            texts_per_img: How many descriptions there are for each image. 
+                directory: For each image there is either a pt file with the embeddings or a directory with #embeddings_per_img .pt embedding files for that image
+            embeddings_per_img: How many descriptions there are for each image. 
                 If None, will return all embeddings.
                 Defaults to None.
             img_size: height and width which the images shall be scaled to, defaults to 128
@@ -157,7 +157,7 @@ class TextMaskDataset(Dataset):
                 self.embeddings_df = pd.read_csv(self.path_embeddings)
                 self.embeddings_in_dataframe = True
 
-        self.texts_per_img = texts_per_img
+        self.embeddings_per_img = embeddings_per_img
         self.img_size = img_size
         self.normalise = normalise
         # I am checking whether the dataset is the default celeba because the default has a different structure than masked celeba.
@@ -200,7 +200,7 @@ class TextMaskDataset(Dataset):
 
     def _get_embeddings(self, idx):
         """Returns embeddings tensor for element with index idx"""
-        random_description_index = np.random.randint(self.texts_per_img) if self.texts_per_img else None
+        random_description_index = np.random.randint(self.embeddings_per_img) if self.embeddings_per_img else None
         # if embeddings were given directly as a tensor
         if self.embeddings_in_tensor and random_description_index != None:
             embedded_description = self.embeddings_tensor[idx][random_description_index]
@@ -366,7 +366,7 @@ class TextMaskDataset(Dataset):
 
         return image, mask, embedded_description, img_name
 
-def sample_text_mask_dataset(dataloader, num_sample_imgs):
+def sample_img_mask_embeddings_dataset(dataloader, num_sample_imgs):
     iterator = iter(dataloader)
     sample_imgs_from_dataset, sample_masks_from_dataset, sample_embeddings_from_dataset, img_names = next(iterator)
     img_names = list(img_names)

@@ -1,6 +1,6 @@
 import torch
 from diffusion import Diffusion
-from utils import get_data_img_mask_text
+from utils import get_data_img_mask_embeddings
 from unet_extended import UNetExtended
 import torch.nn as nn
 
@@ -53,8 +53,8 @@ def load_checkpoint(path_chkpt):
 
     # 8x8 grid of sample images with fixed random values
     # when saving images, 8 columns are default for grid
-    train_dataloader, sample_dataloader, mask_text_dataset = get_data_img_mask_text(args, sample_percentage=0.1)
-    text_embedding_dim = mask_text_dataset.get_embedding_dim()
+    train_dataloader, sample_dataloader, img_mask_embeddings_dataset = get_data_img_mask_embeddings(args, sample_percentage=0.1)
+    embedding_dim = img_mask_embeddings_dataset.get_embedding_dim()
 
     if not args.use_conditional_embeddings:
         use_conditional_embeddings = False
@@ -82,8 +82,8 @@ def load_checkpoint(path_chkpt):
         use_self_attention=args.use_self_attention,
         use_conditional_image=use_conditional_image,
         dropout=args.dropout,
-        use_conditional_text=use_conditional_embeddings,
-        text_embedding_dim=text_embedding_dim,
+        use_conditional_embedding=use_conditional_embeddings,
+        embedding_dim=embedding_dim,
         device=device,
         output_activation_func=args.model_output_activation_func,
         conditional_img_channels=conditional_img_channels,
@@ -97,4 +97,4 @@ def load_checkpoint(path_chkpt):
     # optimizer = optim.AdamW(model.parameters(), lr=args.lr)
     # optimizer.load_state_dict(checkpoint["optim_state"])
 
-    return model, train_dataloader, sample_dataloader, mask_text_dataset, diffusion, args, epoch
+    return model, train_dataloader, sample_dataloader, img_mask_embeddings_dataset, diffusion, args, epoch
