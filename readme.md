@@ -2,6 +2,23 @@
 
 This repository contains a PyTorch based implementation for an image retouching diffusion model. 
 
+
+## Installation
+
+Create a Conda environment with Python 3.8 and activate it:
+
+    conda create -n YOUR_ENV python=3.8
+    conda activate YOUR_ENV
+
+Install PyTorch with Conda:
+
+    conda install pytorch==1.13.1 torchvision==0.14.1 pytorch-cuda=11.7 -c pytorch -c nvidia
+
+Install rest of requirements with pip:
+
+    pip install -r requirements.txt
+
+
 ## Files
 
 ### Scripts
@@ -24,11 +41,3 @@ Some example data based on [CelebAMask-HQ](https://github.com/switchablenorms/Ce
  - `data/CelebAMask-HQ/attr.csv`: Contains the attributes of all 30,000 images of CelebAMask-HQ.
  - `data/CelebAMask-HQ/attr_hair_revised.csv`: Contains hair related attributes of all 30,000 images of CelebAMask-HQ. Note that I also took the liberty to annotate the hair colour of 9,303 of the 9,973 images that had no such annotation yet in CelebAMask-HQ.
  - `data/CelebAMask-HQ/attr_hair_revised_first10.csv`: Same as above, but only for the first 10 images of CelebAMask-HQ.
-
-## Installation
-
-Install the packages from `environment.yml` with conda:
-
-Additionally, install the following with pip:
- - `pip install torch-fidelity`
-
