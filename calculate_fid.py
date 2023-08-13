@@ -1,25 +1,8 @@
-import os
 from pathlib import Path
 from torchmetrics.image.fid import FrechetInceptionDistance
-from skimage import io
-import pandas as pd
-import numpy as np
-import torch
 import torchvision
 from PIL import Image
-from torch.utils.data import Dataset, DataLoader, random_split
-
-
-import os
-from pathlib import Path
-from torchmetrics.image.fid import FrechetInceptionDistance
-from skimage import io
-import pandas as pd
-import numpy as np
-import torch
-import torchvision
-from PIL import Image
-from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.data import Dataset, DataLoader
 
 
 class ImgsDataset(Dataset):

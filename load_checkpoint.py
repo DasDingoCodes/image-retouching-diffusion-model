@@ -1,5 +1,4 @@
 import torch
-from torch import optim
 from diffusion import Diffusion
 from utils import get_data_img_mask_text
 from unet_extended import UNetExtended

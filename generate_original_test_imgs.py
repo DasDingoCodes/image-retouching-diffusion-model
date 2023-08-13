@@ -1,6 +1,5 @@
 import sys
 import math
-import torch
 from skimage import io
 from datetime import datetime
 

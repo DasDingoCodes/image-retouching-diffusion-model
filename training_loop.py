@@ -5,7 +5,6 @@ from pathlib import Path
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 from torch import optim
-from utils import *
 import logging
 from datetime import datetime
 import torchvision.transforms as T
@@ -14,6 +13,7 @@ from csv import DictWriter
 
 from unet_extended import UNetExtended
 from diffusion import Diffusion
+from utils import *
 
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s: %(message)s", level=logging.INFO, datefmt="%I:%M:%S")
