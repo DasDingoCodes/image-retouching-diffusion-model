@@ -23,10 +23,10 @@ Install rest of requirements with pip:
 With the following steps you can train a diffusion model for inpainting.
 Read the script files for further information on how to run them.
 
-Setup some training data, for example [CelebAMask-HQ](https://github.com/switchablenorms/CelebAMask-HQ):
+Set up some training data, for example [CelebAMask-HQ](https://github.com/switchablenorms/CelebAMask-HQ):
 
-  - Put the original images into a folder, e.g. `data/CelebAMask-HQ/CelebA-HQ-img`
-  - Put the corresponding mask images into another folder, e.g. `data/CelebAMask-HQ/hair_masks`. If there is an original image `1.jpg`, then there must be a mask image `1.png`.
+  - Put the original images into a folder, e.g. `data/CelebAMask-HQ/CelebA-HQ-img`.
+  - Put the corresponding .png mask images into another folder, e.g. `data/CelebAMask-HQ/hair_masks`. If there is an original image `1.jpg`, then there must be a mask image `1.png`.
   - Add a .csv file containing the image names and attributes for that image, e.g. `data/attr.csv`. The first value of a row must be the name of an original image, e.g. `1.jpg`, the rest numerical values.
 
 Activate the Conda environment you created above:
