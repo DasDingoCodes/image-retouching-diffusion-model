@@ -1,6 +1,11 @@
 # Image Retouching Diffusion Model
 
 This repository contains a PyTorch based implementation for training an image retouching diffusion model from scratch. 
+The following image-to-image tasks are supported:
+
+- Inpainting
+- Super Resolution
+- Colourisation
 
 
 ## Installation
