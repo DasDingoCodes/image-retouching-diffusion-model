@@ -46,9 +46,7 @@ Now we can compare the original images and the reconstructions. The following co
 
 ### Scripts
 
- - `unet_extended.py`: Architecture of the used neural network, based on the U-Net. The network is used for the calculation of the difference $\mathbf{D}_0$ that will be added to the image $\mathbf{Y}$ which shall be changed. To be precise, the network recieves $\mathbf{D}_t$ as an input and 
- outputs $\mathbf{D}_{t-1}$. Additional modules inject the image to-be-changed $\mathbf{Y}$, the conditional embeddings $\mathbf{z}$ (how shall the original image be changed?) and the encoding of the temporal step $t$ into the network. The network can also split the input $\mathbf{D}_t$ 
- and $\mathbf{Y}$ into a quadratic grid of patches.
+ - `unet_extended.py`: Architecture of the used neural network, based on the U-Net. The network is used for the calculation of the difference $\mathbf{D}_0$ that will be added to the image $\mathbf{Y}$ which shall be changed. To be precise, the network recieves $\mathbf{D}\_t$ as an input and outputs $\mathbf{D}\_{t-1}$. Additional modules inject the image to-be-changed $\mathbf{Y}$, the conditional embeddings $\mathbf{z}$ (how shall the original image be changed?) and the encoding of the temporal step $t$ into the network. The network can also split the input $\mathbf{D}_t$ and $\mathbf{Y}$ into a quadratic grid of patches.
  - `diffusion.py`: Diffusion class containing the sampling process and functions creating the image-to-be-changed $\mathbf{Y}$ (low resolution, greyscale or masked) and the diffused difference $\mathbf{D}_t$ to the original image at timestep $t$.
  - `utils.py`: Dataset class for loading images, their embeddings and image masks. Also contains some helper functions.
  - `training_loop.py`: Trains neural network with the given arguments. Read the file for its various arguments. Will create a directory with a network checkpoint, intermediate image samples and loss and FID statistics (FID is calculated only on the few intermediately sampled images). 
